@@ -2,7 +2,12 @@
   "name": "nitro-flash-debug",
   "type": "module",
   "version": "0.1.0",
+  "packageManager": "pnpm@12.18.0",
   "description": "Flash Debug logging plugin for Nitro and H3 applications",
+  "author": {
+    "name": "imba97",
+    "email": "mail@imba97.cn"
+  },
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -25,6 +30,7 @@
   "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "files": [
+    "LICENSE",
     "README.md",
     "dist"
   ],
