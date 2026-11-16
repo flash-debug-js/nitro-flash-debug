@@ -1,9 +1,10 @@
+import type { DebugContentFormat, DebugLogLevel } from '@flash-debug/types'
 import type { HTTPEvent } from 'h3'
 import { getEventContext, getRequestURL } from 'h3'
 import { definePlugin } from 'nitro'
 
-export type NitroFlashDebugLevel = 'debug' | 'info' | 'warning' | 'error'
-export type NitroFlashDebugContentFormat = 'json' | 'jsonc' | 'jsonl' | 'yaml' | 'ansi' | 'text'
+export type NitroFlashDebugLevel = DebugLogLevel
+export type NitroFlashDebugContentFormat = DebugContentFormat
 
 export interface NitroFlashDebugLogInput {
   level: NitroFlashDebugLevel

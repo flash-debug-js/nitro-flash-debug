@@ -53,6 +53,9 @@
     "h3": ">=2.0.0",
     "nitro": ">=3.0.0"
   },
+  "dependencies": {
+    "@flash-debug/types": "^0.2.2"
+  },
   "devDependencies": {
     "@antfu/eslint-config": "^10.0.0",
     "@types/node": "^26.6.6",

@@ -1,4 +1,7 @@
 minimumReleaseAgeExcludePrune: true
+minimumReleaseAgeExclude:
+  - '@flash-debug/types'
+
 trustPolicy: no-downgrade
 shellEmulator: true
 
