@@ -1,17 +1,11 @@
-import { defineBuildConfig } from 'unbuild'
+import { defineBuildConfig } from 'obuild/config'
 
 export default defineBuildConfig({
-  clean: true,
-  declaration: true,
-  entries: ['src/index'],
-  failOnWarn: false,
-  rollup: {
-    dts: {
-      respectExternal: true,
+  entries: [
+    {
+      type: 'bundle',
+      input: './src/index.ts',
+      outDir: './dist',
     },
-    esbuild: {
-      target: 'node20',
-    },
-    inlineDependencies: false,
-  },
+  ],
 })
