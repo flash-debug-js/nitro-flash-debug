@@ -92,4 +92,31 @@ describe('nitro flash debug plugin', () => {
     expect(records).toHaveLength(0)
     expect(closed).toBe(1)
   })
+
+  it('resolves a request logger without owning its lifecycle', async () => {
+    const { logger, records } = createLogger()
+    let closed = 0
+    logger.close = async () => {
+      closed += 1
+    }
+    const handlers = new Map<string, (...args: any[]) => unknown>()
+    const plugin = createNitroFlashDebugPlugin({
+      resolveLogger: () => logger,
+    })
+    await plugin({
+      hooks: {
+        hook(name: string, handler: (...args: any[]) => unknown) {
+          handlers.set(name, handler)
+        },
+      },
+    } as any)
+
+    const event = createEvent('/api/dynamic')
+    await handlers.get('request')?.(event)
+    await handlers.get('response')?.({ status: 500 }, event)
+    await handlers.get('close')?.()
+
+    expect(records).toHaveLength(1)
+    expect(closed).toBe(0)
+  })
 })
