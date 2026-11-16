@@ -1,0 +1,64 @@
+{
+  "name": "nitro-flash-debug",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Flash Debug logging plugin for Nitro and H3 applications",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://github.com/flash-debug-js/nitro-flash-debug#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flash-debug-js/nitro-flash-debug.git"
+  },
+  "bugs": {
+    "url": "https://github.com/flash-debug-js/nitro-flash-debug/issues"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "files": [
+    "README.md",
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "build": "unbuild",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint --cache .",
+    "lint:fix": "eslint --cache --fix .",
+    "prepare": "simple-git-hooks"
+  },
+  "nano-staged": {
+    "*.ts": "eslint --cache --fix --no-warn-ignored"
+  },
+  "peerDependencies": {
+    "h3": ">=2.0.0",
+    "nitro": ">=3.0.0"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^10.0.0",
+    "@types/node": "^26.6.6",
+    "eslint": "^10.14.0",
+    "h3": "2.0.8",
+    "nano-staged": "^1.0.2",
+    "nitro": "3.0.261103-rc",
+    "simple-git-hooks": "^2.14.0",
+    "typescript": "6.0.3",
+    "unbuild": "^3.6.1",
+    "vitest": "^5.1.0"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "nano-staged"
+  }
+}
