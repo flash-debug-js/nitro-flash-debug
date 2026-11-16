@@ -37,6 +37,7 @@
     "test": "vitest run",
     "lint": "eslint --cache .",
     "lint:fix": "eslint --cache --fix .",
+    "release": "bumpp",
     "prepare": "simple-git-hooks"
   },
   "nano-staged": {
@@ -49,6 +50,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^10.0.0",
     "@types/node": "^26.6.6",
+    "bumpp": "12.3.0",
     "eslint": "^10.14.0",
     "h3": "2.0.8",
     "nano-staged": "^1.0.2",
