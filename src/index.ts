@@ -3,13 +3,14 @@ import { getEventContext, getRequestURL } from 'h3'
 import { definePlugin } from 'nitro'
 
 export type NitroFlashDebugLevel = 'debug' | 'info' | 'warning' | 'error'
+export type NitroFlashDebugContentFormat = 'json' | 'jsonc' | 'jsonl' | 'yaml' | 'ansi' | 'text'
 
 export interface NitroFlashDebugLogInput {
   level: NitroFlashDebugLevel
   message: string
   type?: string
   content?: string
-  contentFormat?: string
+  contentFormat?: NitroFlashDebugContentFormat
   tag?: string
   attributes?: Record<string, unknown>
   error?: unknown
