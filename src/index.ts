@@ -31,7 +31,8 @@ export interface NitroFlashDebugRequestState {
 }
 
 export interface NitroFlashDebugPluginOptions {
-  logger: NitroFlashDebugLogger
+  logger?: NitroFlashDebugLogger
+  resolveLogger?: (event: HTTPEvent) => NitroFlashDebugLogger | undefined
   source?: string
   includeSuccessfulResponses?: boolean
   slowRequestMs?: number
@@ -41,7 +42,8 @@ export interface NitroFlashDebugPluginOptions {
 }
 
 interface NormalizedNitroFlashDebugOptions {
-  logger: NitroFlashDebugLogger
+  logger?: NitroFlashDebugLogger
+  resolveLogger?: (event: HTTPEvent) => NitroFlashDebugLogger | undefined
   source: string
   includeSuccessfulResponses: boolean
   slowRequestMs: number
@@ -63,8 +65,11 @@ export function createNitroFlashDebugPlugin(options: NitroFlashDebugPluginOption
     nitro.hooks.hook('request', (event) => {
       const state = createRequestState(event)
       const context = getEventContext<Record<string, unknown>>(asH3Event(event))
+      const logger = resolveLogger(configuration, event)
       context[NITRO_FLASH_DEBUG_CONTEXT_KEY] = state
-      context[NITRO_FLASH_DEBUG_LOGGER_CONTEXT_KEY] = configuration.logger
+      if (logger) {
+        context[NITRO_FLASH_DEBUG_LOGGER_CONTEXT_KEY] = logger
+      }
     })
 
     nitro.hooks.hook('response', (response, event) => {
@@ -82,13 +87,18 @@ export function createNitroFlashDebugPlugin(options: NitroFlashDebugPluginOption
         return
       }
 
-      emitRequestLog(configuration, event, state, status, durationMs)
+      const logger = getNitroFlashDebugLogger(event)
+      if (logger) {
+        emitRequestLog(configuration, logger, event, state, status, durationMs)
+      }
     })
 
     nitro.hooks.hook('error', (error, context) => {
       const event = context.event
       if (!event) {
-        emitErrorLog(configuration, undefined, undefined, error)
+        if (configuration.logger) {
+          emitErrorLog(configuration, configuration.logger, undefined, undefined, error)
+        }
         return
       }
 
@@ -96,10 +106,16 @@ export function createNitroFlashDebugPlugin(options: NitroFlashDebugPluginOption
       if (state) {
         state.errorLogged = true
       }
-      emitErrorLog(configuration, event, state, error)
+      const logger = getNitroFlashDebugLogger(event)
+      if (logger) {
+        emitErrorLog(configuration, logger, event, state, error)
+      }
     })
 
     nitro.hooks.hook('close', async () => {
+      if (!configuration.logger) {
+        return
+      }
       try {
         await configuration.logger.close()
       }
@@ -111,7 +127,7 @@ export function createNitroFlashDebugPlugin(options: NitroFlashDebugPluginOption
 }
 
 export function getNitroFlashDebugLogger(event: HTTPEvent): NitroFlashDebugLogger | undefined {
-  const context = getEventContext<Record<string, unknown>>(event)
+  const context = getEventContext<Record<string, unknown>>(asH3Event(event))
   const logger = context[NITRO_FLASH_DEBUG_LOGGER_CONTEXT_KEY]
   return isLogger(logger)
     ? logger
@@ -131,12 +147,13 @@ export function getNitroFlashDebugRequestState(event: HTTPEvent): NitroFlashDebu
 }
 
 function normalizeOptions(options: NitroFlashDebugPluginOptions): NormalizedNitroFlashDebugOptions {
-  if (!isLogger(options.logger)) {
-    throw new Error('Nitro Flash Debug plugin requires a logger')
+  if (!isLogger(options.logger) && !options.resolveLogger) {
+    throw new Error('Nitro Flash Debug plugin requires a logger or resolveLogger')
   }
 
   return {
     logger: options.logger,
+    resolveLogger: options.resolveLogger,
     source: options.source?.trim() || DEFAULT_SOURCE,
     includeSuccessfulResponses: options.includeSuccessfulResponses ?? false,
     slowRequestMs: positiveNumber(options.slowRequestMs, DEFAULT_SLOW_REQUEST_MS),
@@ -166,6 +183,7 @@ function getRequestState(event: HTTPEvent): NitroFlashDebugRequestState | undefi
 
 function emitRequestLog(
   options: ReturnType<typeof normalizeOptions>,
+  logger: NitroFlashDebugLogger,
   event: HTTPEvent,
   state: NitroFlashDebugRequestState,
   status: number,
@@ -186,7 +204,7 @@ function emitRequestLog(
       ? 'warning'
       : 'info'
 
-  emitLog(options, {
+  emitLog(options, logger, {
     level,
     type: 'http',
     message: `${state.method} ${state.path} ${status}`,
@@ -196,6 +214,7 @@ function emitRequestLog(
 
 function emitErrorLog(
   options: ReturnType<typeof normalizeOptions>,
+  logger: NitroFlashDebugLogger,
   event: HTTPEvent | undefined,
   state: NitroFlashDebugRequestState | undefined,
   error: unknown,
@@ -215,7 +234,7 @@ function emitErrorLog(
     attributes.status = responseStatus(event)
   }
 
-  emitLog(options, {
+  emitLog(options, logger, {
     level: 'error',
     type: 'exception',
     message: errorMessage(error),
@@ -226,14 +245,22 @@ function emitErrorLog(
 
 function emitLog(
   options: NormalizedNitroFlashDebugOptions,
+  logger: NitroFlashDebugLogger,
   input: NitroFlashDebugLogInput,
 ): void {
   try {
-    options.logger.log(input)
+    logger.log(input)
   }
   catch (error) {
     options.onError?.(error)
   }
+}
+
+function resolveLogger(
+  options: NormalizedNitroFlashDebugOptions,
+  event: HTTPEvent,
+): NitroFlashDebugLogger | undefined {
+  return options.resolveLogger?.(event) ?? options.logger
 }
 
 function isLogger(value: unknown): value is NitroFlashDebugLogger {
