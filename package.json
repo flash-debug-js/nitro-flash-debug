@@ -2,7 +2,7 @@
   "name": "nitro-flash-debug",
   "type": "module",
   "version": "0.1.1",
-  "packageManager": "pnpm@12.18.0",
+  "packageManager": "pnpm@12.21.0",
   "description": "Flash Debug logging plugin for Nitro and H3 applications",
   "author": {
     "name": "imba97",
@@ -51,16 +51,16 @@
   },
   "peerDependencies": {
     "h3": ">=2.0.0",
-    "nitro": ">=3.0.0"
+    "nitro": ">=3.0.0 || 3.0.261103-rc"
   },
   "dependencies": {
-    "@flash-debug/types": "^0.2.2"
+    "@flash-debug/types": "^0.5.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^10.0.0",
     "@types/node": "^26.6.6",
     "bumpp": "12.3.0",
-    "eslint": "^10.14.0",
+    "eslint": "^10.15.0",
     "h3": "2.0.8",
     "nano-staged": "^1.0.2",
     "nitro": "3.0.261103-rc",
